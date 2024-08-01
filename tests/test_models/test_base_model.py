@@ -2,6 +2,7 @@
 """Test BaseModel for expected behavior and documentation"""
 from datetime import datetime
 import inspect
+import logging
 import models
 import pep8 as pycodestyle
 import time
@@ -9,6 +10,9 @@ import unittest
 from unittest import mock
 BaseModel = models.base_model.BaseModel
 module_doc = models.base_model.__doc__
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 class TestBaseModelDocs(unittest.TestCase):
@@ -82,14 +86,20 @@ class TestBaseModel(unittest.TestCase):
         """Test that two BaseModel instances have different datetime objects
         and that upon creation have identical updated_at and created_at
         value."""
-        tic = datetime.now()
+        tic = datetime.utcnow()
         inst1 = BaseModel()
-        toc = datetime.now()
+        toc = datetime.utcnow()
+
+#         logger.debug(f'\n\nTic: {tic}\tToc: {toc}\t\
+# Instance time: {inst1.created_at}\n')
+#         logger.debug(f'\nTiv vs Instance {tic <= inst1.created_at}\n\
+# Instance vs Toc {inst1.created_at <= toc}\n')
+
         self.assertTrue(tic <= inst1.created_at <= toc)
         time.sleep(1e-4)
-        tic = datetime.now()
+        tic = datetime.utcnow()
         inst2 = BaseModel()
-        toc = datetime.now()
+        toc = datetime.utcnow()
         self.assertTrue(tic <= inst2.created_at <= toc)
         self.assertEqual(inst1.created_at, inst1.updated_at)
         self.assertEqual(inst2.created_at, inst2.updated_at)
