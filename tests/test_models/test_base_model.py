@@ -86,6 +86,10 @@ class TestBaseModel(unittest.TestCase):
         """Test that two BaseModel instances have different datetime objects
         and that upon creation have identical updated_at and created_at
         value."""
+
+        # Use same timezone as BaseModel otherwise the test will fail
+        # because of the timezone difference
+
         tic = datetime.utcnow()
         inst1 = BaseModel()
         toc = datetime.utcnow()
