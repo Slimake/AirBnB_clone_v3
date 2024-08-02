@@ -29,13 +29,19 @@ class TestDBStorageDocs(unittest.TestCase):
     def setUpClass(cls):
         """Set up for the doc tests"""
         cls.dbs_f = inspect.getmembers(DBStorage, inspect.isfunction)
-        cls.db = DBStorage()
-        cls.db.reload()
 
-    @classmethod
-    def tearDownClass(cls):
+    def setUp(self):
+        self.db = DBStorage()
+        self.db.reload()
+
+        my_key = sorted(self.db.all())
+        self.first_key = list(my_key)[0]
+        classname, self.id = self.first_key.split(".")
+        self.classname = classes[classname]
+
+    def tearDown(self):
         """Close db session"""
-        cls.db.close()
+        self.db.close()
 
     def test_pep8_conformance_db_storage(self):
         """Test that models/engine/db_storage.py conforms to PEP8."""
@@ -76,10 +82,9 @@ test_db_storage.py'])
 
     def test_db_get_method(self):
         """Test get method for DB storage"""
-        id = '421a55f4-7d82-47d9-b54c-a76916479545'
-        obj_state = self.db.get(State, id)
-        self.assertEqual(obj_state, self.db.get(State, id))
-        self.assertEqual(id, obj_state.id)
+        obj_state = self.db.get(self.classname, self.id)
+        self.assertEqual(obj_state, self.db.get(self.classname, self.id))
+        self.assertEqual(self.id, obj_state.id)
 
     def test_db_count_method_cls_none(self):
         """Test count method where no class is passed"""
