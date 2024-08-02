@@ -5,19 +5,19 @@ Contains the class DBStorage
 
 import models
 from models.amenity import Amenity
-from models.base_model import BaseModel, Base
 from models.city import City
 from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
 from os import getenv
-import sqlalchemy
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 classes = {"Amenity": Amenity, "City": City,
            "Place": Place, "Review": Review, "State": State, "User": User}
+Base = declarative_base()
 
 
 class DBStorage:
@@ -74,3 +74,23 @@ class DBStorage:
     def close(self):
         """call remove() method on the private session attribute"""
         self.__session.remove()
+
+    def get(self, cls, id):
+        """retrieve one object"""
+        try:
+            obj = self.__session.query(cls).filter_by(id=id).first()
+            return obj
+        except Exception as e:
+            return None
+
+    def count(self, cls=None):
+        """count the number of objects in db storage"""
+        count = 0
+        if cls is not None:
+            obj = self.__session.query(cls).all()
+            count = len(obj)
+        else:
+            for clss in classes:
+                objs = self.__session.query(classes[clss]).all()
+                count += len(objs)
+        return count
