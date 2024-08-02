@@ -29,6 +29,13 @@ class TestDBStorageDocs(unittest.TestCase):
     def setUpClass(cls):
         """Set up for the doc tests"""
         cls.dbs_f = inspect.getmembers(DBStorage, inspect.isfunction)
+        cls.db = DBStorage()
+        cls.db.reload()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Close db session"""
+        cls.db.close()
 
     def test_pep8_conformance_db_storage(self):
         """Test that models/engine/db_storage.py conforms to PEP8."""
@@ -66,6 +73,25 @@ test_db_storage.py'])
                              "{:s} method needs a docstring".format(func[0]))
             self.assertTrue(len(func[1].__doc__) >= 1,
                             "{:s} method needs a docstring".format(func[0]))
+
+    def test_db_get_method(self):
+        """Test get method for DB storage"""
+        id = '421a55f4-7d82-47d9-b54c-a76916479545'
+        obj_state = self.db.get(State, id)
+        self.assertEqual(obj_state, self.db.get(State, id))
+        self.assertEqual(id, obj_state.id)
+
+    def test_db_count_method_cls_none(self):
+        """Test count method where no class is passed"""
+        objs_count = len(self.db.all())
+        count = self.db.count()
+        self.assertEqual(count, objs_count)
+
+    def test_db_count_method_cls(self):
+        """Test count method a class is passed"""
+        objs_count = len(self.db.all(State))
+        count = self.db.count(State)
+        self.assertEqual(count, objs_count)
 
 
 class TestFileStorage(unittest.TestCase):

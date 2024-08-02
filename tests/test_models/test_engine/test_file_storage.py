@@ -29,6 +29,7 @@ class TestFileStorageDocs(unittest.TestCase):
     def setUpClass(cls):
         """Set up for the doc tests"""
         cls.fs_f = inspect.getmembers(FileStorage, inspect.isfunction)
+        cls.fs = FileStorage()
 
     def test_pep8_conformance_file_storage(self):
         """Test that models/engine/file_storage.py conforms to PEP8."""
@@ -66,6 +67,18 @@ test_file_storage.py'])
                              "{:s} method needs a docstring".format(func[0]))
             self.assertTrue(len(func[1].__doc__) >= 1,
                             "{:s} method needs a docstring".format(func[0]))
+
+    def test_db_count_method_cls_none(self):
+        """Test count method where no class is passed"""
+        objs_count = len(self.fs.all())
+        count = self.fs.count()
+        self.assertEqual(count, objs_count)
+
+    def test_db_count_method_cls(self):
+        """Test count method a class is passed"""
+        objs_count = len(self.fs.all(State))
+        count = self.fs.count(State)
+        self.assertEqual(count, objs_count)
 
 
 class TestFileStorage(unittest.TestCase):
