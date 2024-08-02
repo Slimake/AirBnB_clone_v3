@@ -84,7 +84,11 @@ test_db_storage.py'])
         """Test get method for DB storage"""
         obj_state = self.db.get(self.classname, self.id)
         self.assertEqual(obj_state, self.db.get(self.classname, self.id))
-        self.assertEqual(self.id, obj_state.id)
+
+    def test_db_get_method_attr(self):
+        """Test get method return type for DB storage"""
+        obj_state = self.db.get(self.classname, self.id)
+        self.assertEqual(obj_state.id, self.id)
 
     def test_db_count_method_cls_none(self):
         """Test count method where no class is passed"""
@@ -93,10 +97,20 @@ test_db_storage.py'])
         self.assertEqual(count, objs_count)
 
     def test_db_count_method_cls(self):
-        """Test count method a class is passed"""
-        objs_count = len(self.db.all(State))
-        count = self.db.count(State)
+        """Test count method, when a class is passed"""
+        objs_count = len(self.db.all(self.classname))
+        count = self.db.count(self.classname)
         self.assertEqual(count, objs_count)
+
+    def test_db_count_method_cls_none_type(self):
+        """Test count method where no class is passed return type"""
+        objs_count = self.db.count()
+        self.assertEqual(type(objs_count), int)
+
+    def test_db_count_method_cls_type(self):
+        """Test count method where class is passed return type"""
+        objs_count = self.db.count(self.classname)
+        self.assertEqual(type(objs_count), int)
 
 
 class TestFileStorage(unittest.TestCase):
