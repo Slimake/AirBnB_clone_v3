@@ -6,6 +6,7 @@ Contains the TestDBStorageDocs and TestDBStorage classes
 from datetime import datetime
 import inspect
 import models
+from models import storage
 from models.engine.db_storage import DBStorage, classes
 from models.amenity import Amenity
 from models.base_model import BaseModel
@@ -68,55 +69,53 @@ class TestDBStorage(unittest.TestCase):
     """Test the FileStorage class"""
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def setUp(self):
-        self.db = DBStorage()
-        self.db.reload()
-
-        my_key = sorted(self.db.all())
-        self.first_key = list(my_key)[0]
+        """setUp method"""
+        self.my_key = sorted(storage.all())
+        self.first_key = list(self.my_key)[0]
         classname, self.id = self.first_key.split(".")
         self.classname = classes[classname]
+
+        self.obj_state = storage.get(self.classname, self.id)
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def tearDown(self):
         """Close db session"""
-        self.db.close()
+        storage.close()
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_get_method(self):
         """Test get method for DB storage"""
-        obj_state = self.db.get(self.classname, self.id)
-        self.assertEqual(obj_state, self.db.get(self.classname, self.id))
+        self.assertEqual(self.obj_state, storage.get(self.classname, self.id))
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_get_method_attr(self):
         """Test get method return type for DB storage"""
-        obj_state = self.db.get(self.classname, self.id)
-        self.assertEqual(obj_state.id, self.id)
+        self.assertEqual(self.obj_state.id, self.id)
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_count_method_cls_none(self):
         """Test count method where no class is passed"""
-        objs_count = len(self.db.all())
-        count = self.db.count()
+        objs_count = len(storage.all())
+        count = storage.count()
         self.assertEqual(count, objs_count)
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_count_method_cls(self):
         """Test count method, when a class is passed"""
-        objs_count = len(self.db.all(self.classname))
-        count = self.db.count(self.classname)
+        objs_count = len(storage.all(self.classname))
+        count = storage.count(self.classname)
         self.assertEqual(count, objs_count)
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_count_method_cls_none_type(self):
         """Test count method where no class is passed return type"""
-        objs_count = self.db.count()
+        objs_count = storage.count()
         self.assertEqual(type(objs_count), int)
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_count_method_cls_type(self):
         """Test count method where class is passed return type"""
-        objs_count = self.db.count(self.classname)
+        objs_count = storage.count(self.classname)
         self.assertEqual(type(objs_count), int)
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
