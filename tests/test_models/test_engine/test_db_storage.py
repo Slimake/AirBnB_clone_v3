@@ -6,7 +6,7 @@ Contains the TestDBStorageDocs and TestDBStorage classes
 from datetime import datetime
 import inspect
 import models
-from models.engine import db_storage
+from models.engine.db_storage import DBStorage, classes
 from models.amenity import Amenity
 from models.base_model import BaseModel
 from models.city import City
@@ -15,12 +15,8 @@ from models.review import Review
 from models.state import State
 from models.user import User
 import json
-import os
 import pep8
 import unittest
-DBStorage = db_storage.DBStorage
-classes = {"Amenity": Amenity, "City": City, "Place": Place,
-           "Review": Review, "State": State, "User": User}
 
 
 class TestDBStorageDocs(unittest.TestCase):
@@ -29,19 +25,6 @@ class TestDBStorageDocs(unittest.TestCase):
     def setUpClass(cls):
         """Set up for the doc tests"""
         cls.dbs_f = inspect.getmembers(DBStorage, inspect.isfunction)
-
-    def setUp(self):
-        self.db = DBStorage()
-        self.db.reload()
-
-        my_key = sorted(self.db.all())
-        self.first_key = list(my_key)[0]
-        classname, self.id = self.first_key.split(".")
-        self.classname = classes[classname]
-
-    def tearDown(self):
-        """Close db session"""
-        self.db.close()
 
     def test_pep8_conformance_db_storage(self):
         """Test that models/engine/db_storage.py conforms to PEP8."""
@@ -60,9 +43,9 @@ test_db_storage.py'])
 
     def test_db_storage_module_docstring(self):
         """Test for the db_storage.py module docstring"""
-        self.assertIsNot(db_storage.__doc__, None,
+        self.assertIsNot(DBStorage.__doc__, None,
                          "db_storage.py needs a docstring")
-        self.assertTrue(len(db_storage.__doc__) >= 1,
+        self.assertTrue(len(DBStorage.__doc__) >= 1,
                         "db_storage.py needs a docstring")
 
     def test_db_storage_class_docstring(self):
@@ -80,41 +63,62 @@ test_db_storage.py'])
             self.assertTrue(len(func[1].__doc__) >= 1,
                             "{:s} method needs a docstring".format(func[0]))
 
+
+class TestDBStorage(unittest.TestCase):
+    """Test the FileStorage class"""
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def setUp(self):
+        self.db = DBStorage()
+        self.db.reload()
+
+        my_key = sorted(self.db.all())
+        self.first_key = list(my_key)[0]
+        classname, self.id = self.first_key.split(".")
+        self.classname = classes[classname]
+
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def tearDown(self):
+        """Close db session"""
+        self.db.close()
+
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_get_method(self):
         """Test get method for DB storage"""
         obj_state = self.db.get(self.classname, self.id)
         self.assertEqual(obj_state, self.db.get(self.classname, self.id))
 
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_get_method_attr(self):
         """Test get method return type for DB storage"""
         obj_state = self.db.get(self.classname, self.id)
         self.assertEqual(obj_state.id, self.id)
 
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_count_method_cls_none(self):
         """Test count method where no class is passed"""
         objs_count = len(self.db.all())
         count = self.db.count()
         self.assertEqual(count, objs_count)
 
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_count_method_cls(self):
         """Test count method, when a class is passed"""
         objs_count = len(self.db.all(self.classname))
         count = self.db.count(self.classname)
         self.assertEqual(count, objs_count)
 
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_count_method_cls_none_type(self):
         """Test count method where no class is passed return type"""
         objs_count = self.db.count()
         self.assertEqual(type(objs_count), int)
 
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_db_count_method_cls_type(self):
         """Test count method where class is passed return type"""
         objs_count = self.db.count(self.classname)
         self.assertEqual(type(objs_count), int)
 
-
-class TestFileStorage(unittest.TestCase):
-    """Test the FileStorage class"""
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_all_returns_dict(self):
         """Test that all returns a dictionaty"""
