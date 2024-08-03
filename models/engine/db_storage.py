@@ -16,6 +16,7 @@ import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.exc import ProgrammingError
 
 Base = declarative_base()
 classes = {"Amenity": Amenity, "City": City, "Place": Place,
@@ -47,10 +48,14 @@ class DBStorage:
         new_dict = {}
         for clss in classes:
             if cls is None or cls is classes[clss] or cls is clss:
-                objs = self.__session.query(classes[clss]).all()
-                for obj in objs:
-                    key = obj.__class__.__name__ + '.' + obj.id
-                    new_dict[key] = obj
+                try:
+                    objs = self.__session.query(classes[clss]).all()
+                    for obj in objs:
+                        key = obj.__class__.__name__ + '.' + obj.id
+                        new_dict[key] = obj
+                except ProgrammingError:
+                    pass
+
         return (new_dict)
 
     def new(self, obj):
@@ -80,7 +85,8 @@ class DBStorage:
     def get(self, cls, id):
         """retrieve one object"""
         try:
-            obj = self.__session.query(cls).filter_by(id=id).first()
+            key = "{}.{}".format(cls.__name__, id)
+            obj = self.all(cls)[key]
             return obj
         except Exception as e:
             return None
@@ -89,10 +95,9 @@ class DBStorage:
         """count the number of objects in db storage"""
         count = 0
         if cls is not None:
-            obj = self.__session.query(cls).all()
+            obj = self.all(cls)
             count = len(obj)
         else:
-            for clss in classes:
-                objs = self.__session.query(classes[clss]).all()
-                count += len(objs)
+            objs = self.all()
+            count = len(objs)
         return count
