@@ -14,12 +14,13 @@ def status():
 
     return jsonify(data)
 
+
 @app_views.route('/stats')
 def stat():
     data = {}
     dict_class = {
-        "amenities": classes['Amenity'], "Cities": classes['City'], 
-        "places": classes['Place'], "reviews": classes['Review'], 
+        "amenities": classes['Amenity'], "Cities": classes['City'],
+        "places": classes['Place'], "reviews": classes['Review'],
         "states": classes['State'], "users": classes['User']}
 
     for cls in dict_class:
