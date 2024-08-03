@@ -6,6 +6,7 @@ Contains the TestFileStorageDocs classes
 from datetime import datetime
 import inspect
 import models
+from models import storage
 from models.engine import file_storage
 from models.amenity import Amenity
 from models.base_model import BaseModel
@@ -29,7 +30,6 @@ class TestFileStorageDocs(unittest.TestCase):
     def setUpClass(cls):
         """Set up for the doc tests"""
         cls.fs_f = inspect.getmembers(FileStorage, inspect.isfunction)
-        cls.fs = FileStorage()
 
     def test_pep8_conformance_file_storage(self):
         """Test that models/engine/file_storage.py conforms to PEP8."""
@@ -68,21 +68,45 @@ test_file_storage.py'])
             self.assertTrue(len(func[1].__doc__) >= 1,
                             "{:s} method needs a docstring".format(func[0]))
 
-    def test_db_count_method_cls_none(self):
-        """Test count method where no class is passed"""
-        objs_count = len(self.fs.all())
-        count = self.fs.count()
-        self.assertEqual(count, objs_count)
-
-    def test_db_count_method_cls(self):
-        """Test count method a class is passed"""
-        objs_count = len(self.fs.all(State))
-        count = self.fs.count(State)
-        self.assertEqual(count, objs_count)
-
 
 class TestFileStorage(unittest.TestCase):
     """Test the FileStorage class"""
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def setUp(self):
+        """setUp method"""
+        self.my_key = sorted(storage.all())
+        self.first_key = list(self.my_key)[0]
+        classname, self.id = self.first_key.split(".")
+        self.classname = classes[classname]
+
+        self.obj_state = storage.get(self.classname, self.id)
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing db storage")
+    def test_db_get_method(self):
+        """Test get method for file storage"""
+        obj_state = storage.get(self.classname, self.id)
+        self.assertEqual(obj_state, storage.get(self.classname, self.id))
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing db storage")
+    def test_db_get_method_attr(self):
+        """Test get method return type for file storage"""
+        obj_state = storage.get(self.classname, self.id)
+        self.assertEqual(obj_state.id, self.id)
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_db_count_method_cls_none(self):
+        """Test count method where no class is passed"""
+        objs_count = len(storage.all())
+        count = storage.count()
+        self.assertEqual(count, objs_count)
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_db_count_method_cls(self):
+        """Test count method a class is passed"""
+        objs_count = len(storage.all(State))
+        count = storage.count(State)
+        self.assertEqual(count, objs_count)
+
     @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
     def test_all_returns_dict(self):
         """Test that all returns the FileStorage.__objects attr"""
