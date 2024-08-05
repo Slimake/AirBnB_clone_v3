@@ -1,4 +1,10 @@
 #!/usr/bin/python3
+"""
+states module
+
+This module contains the views for handling State objects in the API.
+It defines routes for retrieving, creating, updating, and deleting State objects.
+"""
 
 from models.state import State
 from models import storage
