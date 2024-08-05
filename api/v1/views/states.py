@@ -14,21 +14,21 @@ from flask import abort, jsonify, request
 
 
 @app_views.route('/states', methods=['GET'])
-@app_views.route('/states/<state_id>', methods=['GET'])
-def get_states(state_id=None):
+def get_states():
     """
-    Retrieves the list of State objects if state_id is None,
+    Retrieves the list of State objects
+    """
+    state_list = [state.to_dict() for state in storage.all(State).values()]
+    return jsonify(state_list)
+
+
+@app_views.route('/states/<state_id>', methods=['GET'])
+def get_state_id(state_id):
+    """
     Retrieves a state when state_id is provided
     """
-    states = storage.all(State)
-    objs = {}
-    for key, value in states.items():
-        objs[key] = value.to_dict()
-    if state_id is None:
-        return jsonify(list(objs.values()))
-
     state = storage.get(State, state_id)
-    if state is not None:
+    if state:
         return jsonify(state.to_dict())
     else:
         abort(404)
@@ -41,9 +41,9 @@ def delete_state(state_id):
     """
     state = storage.get(State, state_id)
     if state:
-        storage.delete(state)
+        state.delete()
         storage.save()
-        return {}, 200
+        return jsonify({}), 200
     else:
         abort(404)
 
@@ -72,6 +72,6 @@ def update_state(state_id):
     if not obj:
         return jsonify({"error": "Not a JSON"}), 400
 
-    state.name = obj.get('name', state.name)
+    state.name = obj['name']
     state.save()
     return jsonify(state.to_dict()), 200
