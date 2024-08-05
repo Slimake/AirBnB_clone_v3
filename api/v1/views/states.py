@@ -3,7 +3,8 @@
 states module
 
 This module contains the views for handling State objects in the API.
-It defines routes for retrieving, creating, updating, and deleting State objects.
+It defines routes for retrieving, creating, updating,
+and deleting State objects.
 """
 
 from models.state import State
@@ -52,9 +53,9 @@ def create_state():
     """Create State object"""
     obj = request.get_json()
     if not obj:
-        return "Not a JSON", 400
+        return jsonify({"error": "Not a JSON"}), 400
     if 'name' not in obj:
-        return "Missing name", 400
+        return jsonify({"error": "Missing name"}), 400
 
     state = State(**obj)
     state.save()
@@ -69,7 +70,7 @@ def update_state(state_id):
     if not state:
         abort(404)
     if not obj:
-        return "Not a JSON", 400
+        return jsonify({"error": "Not a JSON"}), 400
 
     state.name = obj.get('name', state.name)
     state.save()
