@@ -75,7 +75,6 @@ def update_user(user_id):
     if not obj_data:
         return jsonify({"error": "Not a JSON"}), 400
 
-    user_obj.email = obj_data['email']
     user_obj.password = obj_data['password']
     user_obj.save()
     return jsonify(user_obj.to_dict()), 200
