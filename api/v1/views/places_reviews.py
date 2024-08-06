@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-place_reviews module
+places_reviews module
 
 This module contains the views for handling Review objects in the API.
 It defines routes for retrieving, creating, updating,
